@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ ! -d /var/run/nagios ]; then
+  mkdir -p /var/run/nagios
+  chown nagios:nagios /var/run/nagios
+fi
