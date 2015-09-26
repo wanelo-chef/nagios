@@ -1,0 +1,36 @@
+server {
+  server_name <%= @server_name %>;
+  access_log  /var/log/nginx/nagios.access.log;
+  error_log   /var/log/nginx/nagios.error.log;
+
+  root    /var/www;
+  index   index.php index.html;
+
+  location / {
+    try_files $uri $uri/ index.php;
+  }
+
+  location /nagios {
+    alias /opt/local/share/nagios;
+  }
+
+  location ~ ^/nagios/(.*\.php)$ {
+    alias /opt/local/share/nagios/$1;
+    include /opt/local/etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+  }
+
+  location ~ \.cgi$ {
+    root /opt/local/libexec/nagios/cgi-bin/;
+    rewrite ^/nagios/cgi-bin/(.*)\.cgi /$1.cgi break;
+    fastcgi_param AUTH_USER $remote_user;
+    fastcgi_param REMOTE_USER $remote_user;
+    include /opt/local/etc/nginx/fastcgi.conf;
+    fastcgi_pass unix:/var/run/fcgiwrap.socket;
+  }
+
+  location ~ \.php$ {
+    include /opt/local/etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+  }
+}

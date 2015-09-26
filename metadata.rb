@@ -6,5 +6,7 @@ description      'Installs/Configures nagios'
 long_description 'Installs/Configures nagios'
 version          '0.1.0'
 
+depends 'monkeypatch_chef'
+depends 'nginx'
 depends 'paths'
 depends 'smf'

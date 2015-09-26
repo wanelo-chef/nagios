@@ -23,4 +23,4 @@ platforms:
 suites:
   - name: install
     run_list:
-      - recipe[nagios::install_package]
+      - recipe[test-setup::install]
