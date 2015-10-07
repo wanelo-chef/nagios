@@ -23,6 +23,10 @@ class Chef
       def server_name(arg = nil)
         set_or_return(:server_name, arg, kind_of: String, required: true)
       end
+
+      def url_html_path(arg = nil)
+        set_or_return(:url_html_path, arg, kind_of: String, default: '/nagios')
+      end
     end
   end
 end

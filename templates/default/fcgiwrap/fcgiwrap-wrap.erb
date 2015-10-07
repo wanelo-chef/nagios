@@ -1,0 +1,32 @@
+#!/bin/bash
+
+. /lib/svc/share/smf_include.sh
+
+result=${SMF_EXIT_OK}
+
+if [ -z "$SMF_FMRI" ]; then
+  SMF_FMRI="svc:/application/fcgiwrap:default"
+fi
+
+case "$SMF_METHOD" in
+'start')
+  process_count=`svcprop -p config/process_count $SMF_FMRI`
+  socket_file=`svcprop -p config/socket_file $SMF_FMRI`
+
+  rm -f ${socket_file}
+
+  /opt/local/sbin/fcgiwrap -f -s unix:${socket_file} -c ${process_count} &
+  ;;
+'stop')
+  socket_file=`svcprop -p config/socket_file $SMF_FMRI`
+  contract=`svcprop -p restarter/contract $SMF_FMRI`
+  rm -f ${socket_file}
+  smf_kill_contract ${contract} QUIT
+  ;;
+*)
+  echo "Usage: $0 [start|stop]" >&2
+  exit 1
+  ;;
+esac
+
+exit ${result}

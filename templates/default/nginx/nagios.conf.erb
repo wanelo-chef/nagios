@@ -3,7 +3,7 @@ server {
   access_log  /var/log/nginx/nagios.access.log;
   error_log   /var/log/nginx/nagios.error.log;
 
-  root    /var/www;
+  root    /opt/local/share/nagios;
   index   index.php index.html;
 
   location / {
@@ -30,7 +30,10 @@ server {
   }
 
   location ~ \.php$ {
-    include /opt/local/etc/nginx/fastcgi_params;
+    try_files $uri =404;
+    fastcgi_index index.php;
     fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    include /opt/local/etc/nginx/fastcgi_params;
   }
 }

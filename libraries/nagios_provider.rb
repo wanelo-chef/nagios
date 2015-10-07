@@ -50,6 +50,7 @@ class Chef
           owner 'nagios'
           group 'nagios'
           mode 0644
+          variables 'url_html_path' => new_resource.url_html_path
           notifies :verify, new_resource.to_s
         end
       end
@@ -134,6 +135,42 @@ class Chef
             ]
           notifies :verify, new_resource.to_s
         end
+
+        service 'php-fpm' do
+          supports restart: true, status: true, reload: true
+        end
+
+        template '/opt/local/etc/php-fpm.conf' do
+          source 'php/php-fpm.conf.erb'
+          cookbook 'nagios'
+          mode 0644
+          notifies :restart, 'service[php-fpm]'
+        end
+
+        template '/opt/local/sbin/fcgiwrap-wrap' do
+          source 'fcgiwrap/fcgiwrap-wrap.erb'
+          cookbook 'nagios'
+          mode 0755
+        end
+
+        smf 'fcgiwrap' do
+          fmri '/application/fcgiwrap'
+          start_command '/opt/local/sbin/fcgiwrap-wrap'
+          stop_command '/opt/local/sbin/fcgiwrap-wrap'
+          start_timeout 15
+          stop_timeout 15
+          restart_timeout 15
+          ignore %w(core signal)
+          property_groups({
+            'config' => {
+              'process_count' => 5,
+              'socket_file' => '/var/run/fcgiwrap.socket'
+            }
+          })
+          notifies :enable, 'service[fcgiwrap]'
+        end
+
+        service 'fcgiwrap'
       end
 
       def nagios_service
