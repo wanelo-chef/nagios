@@ -1,5 +1,5 @@
 server {
-  server_name <%= @server_name %>;
+  server_name <%= @server_name %> <%= @server_aliases.join(' ') %>;
   access_log  /var/log/nginx/nagios.access.log;
   error_log   /var/log/nginx/nagios.error.log;
 

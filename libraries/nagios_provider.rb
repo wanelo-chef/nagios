@@ -64,7 +64,8 @@ class Chef
           owner 'www'
           group 'www'
           mode 0644
-          variables 'server_name' => new_resource.server_name
+          variables 'server_name' => new_resource.server_name,
+            'server_aliases' => new_resource.server_aliases
           notifies :run, 'execute[verify nginx configuration file]'
         end
 
@@ -120,9 +121,13 @@ class Chef
           group 'nagios'
           start_command '/opt/local/bin/nagios -d %{config_file}'
           start_timeout 70
+          stop_command ':kill -TERM'
           stop_timeout 60
+          restart_command ':kill -HUP'
+          restart_timeout 30
           ignore %w(core signal)
           working_directory '/var/spool/nagios'
+          environment 'PATH' => node['paths']['bin_path']
           property_groups({
               'application' => {
                 'config_file' => '/opt/local/etc/nagios/nagios.cfg'
